@@ -10,9 +10,13 @@ import datalayer.employee.EmployeeStorageImpl;
 import dto.Booking;
 import dto.Customer;
 import dto.Employee;
+import dto.SmsMessage;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.configuration.FluentConfiguration;
 import org.junit.jupiter.api.*;
+import org.mockito.Mockito;
+import org.testcontainers.shaded.com.google.common.base.Verify;
+import servicelayer.notifications.SmsService;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -81,5 +85,24 @@ public class CreateBookingTest {
 
         Assertions.assertTrue(bookingsForCustomers.iterator().next().getId() == bookingID);
 
+    }
+
+    @Test
+    public void checkPhoneNumberIsStored()
+    {
+        List<Customer> customers = new ArrayList<>();
+        try {
+            customers = customerStorage.getCustomers();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        int customerID = customers.get(0).getId();
+        Collection<Employee> employeeWithID = employeeStorage.getEmployeeWithID(1);
+        int id = employeeWithID.iterator().next().getId();
+        Date past = faker.date().past(5, TimeUnit.HOURS);
+        Date future = faker.date().future(5, TimeUnit.HOURS);
+        bookingStorage.createBooking(id, customerID, past, future);
+        SmsMessage smsMessage = new SmsMessage("", "");
+        //Mockito.verify(SmsService, Mockito.times(1));
     }
 }
