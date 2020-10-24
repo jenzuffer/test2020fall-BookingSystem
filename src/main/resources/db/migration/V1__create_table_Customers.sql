@@ -3,6 +3,7 @@ create table Customers (
 	firstname varchar(255) not null,
 	lastname varchar(255),
 	birthdate date,
+	phonenumber varchar(255),
 	PRIMARY KEY (ID)
 )
 

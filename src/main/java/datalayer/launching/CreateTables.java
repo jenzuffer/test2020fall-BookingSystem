@@ -10,7 +10,7 @@ import java.util.Date;
 public class CreateTables {
     private String connectionString;
     private String username, password;
-    private static final String dbInitTables = "jdbc:mysql://0.0.0.0:3307/";
+    private static final String dbInitTables = "jdbc:mysql://0.0.0.0:3307/DemoApplication";
 
     public CreateTables(String conStr, String user, String pass) {
         connectionString = conStr;

@@ -25,7 +25,7 @@ public class CustomerStorageImpl implements CustomerStorage {
 
     @Override
     public Customer getCustomerWithId(int customerId) {
-        String sql = "select ID, firstname, lastname, birthdate, phonenumber from DemoApplication.Customers where id = ?";
+        String sql = "select ID, firstname, lastname, birthdate, phonenumber from Customers where id = ?";
         try (Connection con = getConnection();
              var stmt = con.prepareStatement(sql)) {
             stmt.setInt(1, customerId);
@@ -51,7 +51,7 @@ public class CustomerStorageImpl implements CustomerStorage {
              var stmt = con.createStatement()) {
             Collection<Customer> results = new LinkedHashSet();
 
-            ResultSet resultSet = stmt.executeQuery("select ID, firstname, lastname, birthdate, phonenumber from DemoApplication.Customers");
+            ResultSet resultSet = stmt.executeQuery("select ID, firstname, lastname, birthdate, phonenumber from Customers");
 
             while (resultSet.next()) {
                 int id = resultSet.getInt("ID");
@@ -69,7 +69,7 @@ public class CustomerStorageImpl implements CustomerStorage {
     }
 
     public int createCustomer(CustomerCreation customerToCreate) throws SQLException {
-        String sql = "insert into DemoApplication.Customers(firstname, lastname, birthdate, phonenumber) values (?, ?, ?, ?)";
+        String sql = "insert into Customers(firstname, lastname, birthdate, phonenumber) values (?, ?, ?, ?)";
         try (Connection con = getConnection();
              var stmt = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, customerToCreate.getFirstname());

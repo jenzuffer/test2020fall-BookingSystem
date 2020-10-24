@@ -25,14 +25,15 @@ public class BookingStorageImpl implements BookingStorage {
 
     @Override
     public int createBooking(int customerID, int employeeID, Date start, Date end) {
-        String sql = "insert into DemoApplication.Bookings(customerId, employeeId, date, start, end) values (?, ?, ?, ?, ?)";
+        String sql = "insert into Bookings(customerId, employeeId, date, start, end) values (?, ?, ?, ?, ?)";
         try (Connection con = getConnection();
              var stmt = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setInt(1, customerID);
             stmt.setInt(2, employeeID);
             stmt.setDate(3, new java.sql.Date(new Date().getTime()));
-            stmt.setTime(4, (Time) start);
-            stmt.setTime(5, (Time) end);
+            stmt.setTime(4, new Time(start.getTime()));
+            stmt.setTime(5, new Time(end.getTime()));
+            stmt.executeUpdate();
             // get the newly created id
             try (var resultSet = stmt.getGeneratedKeys()) {
                 resultSet.next();
@@ -51,7 +52,7 @@ public class BookingStorageImpl implements BookingStorage {
     @Override
     public Collection<Booking> getBookingsForCustomers(int customerID) {
         Collection<Booking> bookings = new LinkedHashSet();
-        String sql = "select ID, customerId, employeeId, `date`, `start`, `end` FROM DemoApplication.Bookings WHERE customerId = ?";
+        String sql = "select ID, customerId, employeeId, `date`, `start`, `end` FROM Bookings WHERE customerId = ? order by ID desc";
         try (Connection con = getConnection();
              var stmt = con.prepareStatement(sql)) {
             stmt.setInt(1, customerID);
@@ -75,7 +76,7 @@ public class BookingStorageImpl implements BookingStorage {
     @Override
     public Collection<Booking> getBookingsForEmployees(int employeeID) {
         Collection<Booking> bookings = new LinkedHashSet();
-        String sql = "select ID, customerId, employeeId, `date`, `start`, `end` FROM DemoApplication.Bookings WHERE employeeId = ?";
+        String sql = "select ID, customerId, employeeId, `date`, `start`, `end` FROM Bookings WHERE employeeId = ?";
         try (Connection con = getConnection();
              var stmt = con.prepareStatement(sql)) {
             stmt.setInt(1, employeeID);

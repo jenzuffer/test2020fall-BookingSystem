@@ -3,6 +3,7 @@ package datalayer.employee;
 import dto.Employee;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -24,7 +25,7 @@ public class EmployeeStorageImpl implements EmployeeStorage {
 
     @Override
     public int createEmployee(String firstName, String lastName, Date birthdate, String job_description) {
-        String sql = "insert into Customers(firstname, lastname, birthdate, job_description) values (?, ?, ?, ?)";
+        String sql = "insert into Employees(firstname, lastname, birthdate, job_description) values (?, ?, ?, ?)";
         int anInt = 0;
         try (Connection con = getConnection();
              PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -45,16 +46,17 @@ public class EmployeeStorageImpl implements EmployeeStorage {
 
     @Override
     public Collection<Employee> getEmployeeWithID(int employeeID) {
-        Collection<Employee> employeeCollection = Arrays.asList();
-        String sql = "SELECT * FROM DemoApplication.Employees WHERE ID = (?)";
+        Collection<Employee> employeeCollection = new ArrayList();
+        String sql = "SELECT * FROM Employees WHERE ID = (?)";
         try (Connection con = getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, employeeID);
             try (ResultSet rs = ps.executeQuery()) {
-                rs.next();
-                employeeCollection.add(new Employee(rs.getInt(1), rs.getString(2),
-                        rs.getString(3), rs.getString(4), rs.getDate(5)));
-
+                if (rs.next()) {
+                    Employee employee = new Employee(rs.getInt("ID"), rs.getString("firstname"),
+                            rs.getString("lastname"), rs.getString("job_description"), rs.getDate("birthdate"));
+                    employeeCollection.add(employee);
+                }
             }
         } catch (SQLException throwables) {
             throwables.printStackTrace();
