@@ -26,11 +26,18 @@ class SvcCreateCustomerTest {
     private CustomerService svc;
 
     private static final String PASSWORD = "testuser123";
+    private static final String USER = "root";
+    private static final int PORT = 3306;
 
+
+    @Container
+    public static MySQLContainer mysql = (MySQLContainer) new MySQLContainer(DockerImageName.parse("mysql"))
+            .withPassword(PASSWORD)
+            .withExposedPorts(PORT);
 
     @BeforeAll
     public void setup() {
-        String url = "jdbc:mysql://0.0.0.0:3307/";
+        String url = "jdbc:mysql://"+mysql.getHost()+":"+mysql.getFirstMappedPort()+"/";
         String db = "DemoApplicationTest";
         Flyway flyway = new Flyway(
                 new FluentConfiguration()
@@ -38,7 +45,7 @@ class SvcCreateCustomerTest {
                         .defaultSchema(db)
                         .createSchemas(true)
                         .target("3")
-                        .dataSource(url, "root", PASSWORD)
+                        .dataSource(url, USER, PASSWORD)
         );
         flyway.migrate();
         svc = new CustomerServiceImpl(new CustomerStorageImpl(url + db, "root", PASSWORD));

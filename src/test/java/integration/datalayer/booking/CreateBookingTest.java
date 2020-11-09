@@ -12,7 +12,11 @@ import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.configuration.FluentConfiguration;
 import org.junit.jupiter.api.*;
 import org.mockito.Mockito;
+import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.com.google.common.base.Verify;
+import org.testcontainers.utility.DockerImageName;
 import servicelayer.notifications.SmsService;
 
 import java.sql.SQLException;
@@ -26,46 +30,61 @@ import static org.mockito.Mockito.mock;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Tag("integration")
+@Testcontainers
 public class CreateBookingTest {
     private CustomerStorage customerStorage;
     private EmployeeStorage employeeStorage;
     private BookingStorage bookingStorage;
     private Faker faker = new Faker();
 
-    private static final String conStr = "jdbc:mysql://0.0.0.0:3307/";
-    private static final String user = "root";
-    private static final String pass = "testuser123";
+    private static final String PASSWORD = "testuser123";
+    private static final String USER = "root";
+    private static final int PORT = 3306;
 
+    @Container
+    public static MySQLContainer mysql = (MySQLContainer) new MySQLContainer(DockerImageName.parse("mysql"))
+            .withPassword(PASSWORD)
+            .withExposedPorts(PORT);
     @AfterAll
     public void finish() {
         var db = "DemoApplicationTest";
+        String url = "jdbc:mysql://"+mysql.getHost()+":"+mysql.getFirstMappedPort()+"/";
+
         Flyway flyway = new Flyway(new FluentConfiguration()
                 .defaultSchema(db)
                 .createSchemas(true)
                 .schemas(db)
                 .target("4")
-                .dataSource(conStr, "root", pass));
+                .dataSource(url, USER, PASSWORD));
 
         flyway.clean();
     }
 
     @BeforeAll
     public void Setup() throws SQLException {
-        var url = "jdbc:mysql://0.0.0.0:3307/";
         var db = "DemoApplicationTest";
+        String url = "jdbc:mysql://"+mysql.getHost()+":"+mysql.getFirstMappedPort()+"/";
 
         Flyway flyway = new Flyway(new FluentConfiguration()
                 .defaultSchema(db)
                 .createSchemas(true)
                 .schemas(db)
+                .target("1")
+                .dataSource(url, USER, PASSWORD));
+        flyway.migrate();
+
+        flyway = new Flyway(new FluentConfiguration()
+                .defaultSchema(db)
+                .createSchemas(true)
+                .schemas(db)
                 .target("3")
-                .dataSource(url, "root", "testuser123"));
+                .dataSource(url, USER, PASSWORD));
 
         flyway.migrate();
 
-        bookingStorage = new BookingStorageImpl(url + db, "root", "testuser123");
-        employeeStorage = new EmployeeStorageImpl(url + db, "root", "testuser123");
-        customerStorage = new CustomerStorageImpl(url + db, "root", "testuser123");
+        bookingStorage = new BookingStorageImpl(url + db, USER, PASSWORD);
+        employeeStorage = new EmployeeStorageImpl(url + db, USER, PASSWORD);
+        customerStorage = new CustomerStorageImpl(url + db, USER, PASSWORD);
         int numberOfBookings = 5;
         addFakeBookings(numberOfBookings);
         var firstName = "aCustomer";
@@ -74,6 +93,7 @@ public class CreateBookingTest {
         String phonenumber =  "2944033";
         CustomerCreation customercreation = new CustomerCreation(firstName, lastName, birthdate);
         customerStorage.createCustomer(customercreation);
+
 
     }
 
@@ -92,6 +112,7 @@ public class CreateBookingTest {
 
     @Test
     public void mustSaveBookingInDatabase(){
+
         //arrange
         List<Customer> customers = new ArrayList<>();
         try {

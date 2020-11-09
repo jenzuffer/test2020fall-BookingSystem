@@ -8,6 +8,10 @@ import dto.CustomerCreation;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.configuration.FluentConfiguration;
 import org.junit.jupiter.api.*;
+import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 import java.sql.SQLException;
 import java.util.Date;
@@ -17,12 +21,26 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Tag("integration")
+@Testcontainers
 class CreateCustomerTest {
     private CustomerStorage customerStorage;
     private Faker faker = new Faker();
+
+    private static final String PASSWORD = "testuser123";
+    private static final String USER = "root";
+    private static final int PORT = 3306;
+
+
+    @Container
+    public static MySQLContainer mysql = (MySQLContainer) new MySQLContainer(DockerImageName.parse("mysql"))
+            .withPassword(PASSWORD)
+            .withExposedPorts(PORT);
+
+
+
     @BeforeAll
     public void Setup() throws SQLException {
-        var url = "jdbc:mysql://0.0.0.0:3307/";
+        String url = "jdbc:mysql://"+mysql.getHost()+":"+mysql.getFirstMappedPort()+"/";
         var db = "DemoApplicationTest";
 
         Flyway flyway = new Flyway(new FluentConfiguration()
@@ -30,11 +48,11 @@ class CreateCustomerTest {
                 .createSchemas(true)
                 .schemas(db)
                 .target("2")
-                .dataSource(url, "root", "testuser123"));
+                .dataSource(url, USER, PASSWORD));
 
         flyway.migrate();
 
-        customerStorage = new CustomerStorageImpl(url + db, "root", "testuser123");
+        customerStorage = new CustomerStorageImpl(url + db, USER, PASSWORD);
 
         int numCustomers = customerStorage.getAllCustomers().size();
         addFakeCustomers(numCustomers);
@@ -84,7 +102,9 @@ class CreateCustomerTest {
         assertEquals(1, id2 - id1);
     }
 
+
     @Test
+    @Disabled("this test is not ready yet")
     public void MustUpdateCustomerWithPhoneNumber() throws SQLException {
         //arrange
         List<Customer> allCustomers = customerStorage.getAllCustomers();

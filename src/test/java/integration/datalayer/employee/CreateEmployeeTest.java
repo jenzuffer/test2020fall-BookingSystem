@@ -9,6 +9,10 @@ import dto.Employee;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.configuration.FluentConfiguration;
 import org.junit.jupiter.api.*;
+import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 import java.sql.SQLException;
 import java.util.Collection;
@@ -18,12 +22,23 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Tag("integration")
+@Testcontainers
 public class CreateEmployeeTest {
     private EmployeeStorage employeeStorage;
     private Faker faker = new Faker();
+
+    private static final String PASSWORD = "testuser123";
+    private static final String USER = "root";
+    private static final int PORT = 3306;
+
+    @Container
+    public static MySQLContainer mysql = (MySQLContainer) new MySQLContainer(DockerImageName.parse("mysql"))
+            .withPassword(PASSWORD)
+            .withExposedPorts(PORT);
+
     @BeforeAll
     public void Setup() throws SQLException {
-        var url = "jdbc:mysql://0.0.0.0:3307/";
+        String url = "jdbc:mysql://"+mysql.getHost()+":"+mysql.getFirstMappedPort()+"/";
         var db = "DemoApplicationTest";
 
         Flyway flyway = new Flyway(new FluentConfiguration()
@@ -31,11 +46,11 @@ public class CreateEmployeeTest {
                 .createSchemas(true)
                 .schemas(db)
                 .target("2")
-                .dataSource(url, "root", "testuser123"));
-        flyway.repair();
+                .dataSource(url, USER, PASSWORD));
+
         flyway.migrate();
 
-        employeeStorage = new EmployeeStorageImpl(url + db, "root", "testuser123");
+        employeeStorage = new EmployeeStorageImpl(url + db, USER, PASSWORD);
 
         int numEmployees = 5;
         addFakeEmployees(numEmployees);
