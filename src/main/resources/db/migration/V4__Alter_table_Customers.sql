@@ -1,0 +1,1 @@
+ALTER table Customers add column (phonenvarchar varchar(255));

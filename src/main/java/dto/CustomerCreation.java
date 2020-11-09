@@ -19,11 +19,17 @@ public class CustomerCreation {
         return phoneNumber;
     }
 
-    public final String phoneNumber;
+    public String phoneNumber;
 
     public final Date birthdate;
 
     public final String firstname, lastname;
+
+    public CustomerCreation(String firstname, String lastname, Date birthdate) {
+        this.firstname = firstname;
+        this.lastname = lastname;
+        this.birthdate = birthdate;
+    }
 
     public CustomerCreation(String phoneNumber, String firstname, String lastname, Date birthdate) {
         this.phoneNumber = phoneNumber;

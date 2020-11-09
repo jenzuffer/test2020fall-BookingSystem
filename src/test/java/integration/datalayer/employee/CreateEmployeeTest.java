@@ -32,7 +32,7 @@ public class CreateEmployeeTest {
                 .schemas(db)
                 .target("2")
                 .dataSource(url, "root", "testuser123"));
-
+        flyway.repair();
         flyway.migrate();
 
         employeeStorage = new EmployeeStorageImpl(url + db, "root", "testuser123");
@@ -52,20 +52,20 @@ public class CreateEmployeeTest {
     @Test
     public void mustSaveEmployeeInDatabaseWhenCreatingEmployee() throws SQLException {
         // Arrange
-        // Act
         java.sql.Date date1 = new java.sql.Date(new Date(1239821l).getTime());
         String name = faker.name().firstName();
         String lastName = faker.name().lastName();
         Date birthday = faker.date().birthday();
         String job = faker.job().field();
+        // Act
         int newestEmployeeID = employeeStorage.createEmployee(name, lastName, birthday, job);
         System.out.println("newestEmployeeID: " + newestEmployeeID);
         Collection<Employee> employeeWithID = employeeStorage.getEmployeeWithID(newestEmployeeID);
         Employee employeeByID = employeeWithID.iterator().next();
-        Assertions.assertTrue(employeeByID.getFirstname().equals(name));
-        Assertions.assertTrue(employeeByID.getId() == newestEmployeeID);
+
 
         // Assert
-        
+        Assertions.assertTrue(employeeByID.getFirstname().equals(name));
+        Assertions.assertTrue(employeeByID.getId() == newestEmployeeID);
     }
 }

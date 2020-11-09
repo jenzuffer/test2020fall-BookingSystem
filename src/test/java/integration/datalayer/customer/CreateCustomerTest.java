@@ -3,16 +3,15 @@ package integration.datalayer.customer;
 import com.github.javafaker.Faker;
 import datalayer.customer.CustomerStorage;
 import datalayer.customer.CustomerStorageImpl;
+import dto.Customer;
 import dto.CustomerCreation;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.configuration.FluentConfiguration;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -20,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Tag("integration")
 class CreateCustomerTest {
     private CustomerStorage customerStorage;
-
+    private Faker faker = new Faker();
     @BeforeAll
     public void Setup() throws SQLException {
         var url = "jdbc:mysql://0.0.0.0:3307/";
@@ -37,8 +36,14 @@ class CreateCustomerTest {
 
         customerStorage = new CustomerStorageImpl(url + db, "root", "testuser123");
 
-        int numCustomers = customerStorage.getCustomers().size();
+        int numCustomers = customerStorage.getAllCustomers().size();
         addFakeCustomers(numCustomers);
+        var firstName = "aCustomer";
+        var lastName = "bCustomer";
+        var birthdate = new Date(123456789l);
+        String phonenumber =  "2944033";
+        CustomerCreation customercreation = new CustomerCreation(firstName, lastName, birthdate);
+        customerStorage.createCustomer(customercreation);
 
     }
 
@@ -59,7 +64,7 @@ class CreateCustomerTest {
         customerStorage.createCustomer(new CustomerCreation("7462848", "John", "Carlssonn", date1));
 
         // Assert
-        var customers = customerStorage.getCustomers();
+        var customers = customerStorage.getCustomersByFirstname("John");
         assertTrue(
                 customers.stream().anyMatch(x ->
                         x.getFirstname().equals("John") &&
@@ -77,5 +82,18 @@ class CreateCustomerTest {
 
         // Assert
         assertEquals(1, id2 - id1);
+    }
+
+    @Test
+    public void MustUpdateCustomerWithPhoneNumber() throws SQLException {
+        //arrange
+        List<Customer> allCustomers = customerStorage.getAllCustomers();
+        String phonenumber = faker.phoneNumber().phoneNumber();
+        //act
+        Customer customer = allCustomers.get(0);
+        String returnedPhone = customerStorage.updateCustomerWithPhoneNumber(customer, phonenumber);
+
+        //assert
+        Assertions.assertEquals(phonenumber, returnedPhone);
     }
 }

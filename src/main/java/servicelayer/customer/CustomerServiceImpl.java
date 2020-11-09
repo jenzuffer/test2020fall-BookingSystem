@@ -33,11 +33,11 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public Collection<Customer> getCustomersByFirstName(String firstName) {
         Collection<Customer> customers = null;
+        if (firstName == null || firstName.isEmpty())
+            return customers;
         try {
-            for (Customer customer : customerStorage.getCustomers()) {
-                if (customer.getFirstname().equalsIgnoreCase(firstName)) {
+            for (Customer customer : customerStorage.getCustomersByFirstname(firstName)) {
                     customers.add(customer);
-                }
             }
 
         } catch (SQLException throwables) {
