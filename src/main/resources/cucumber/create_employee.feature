@@ -1,8 +1,11 @@
+
+
+
 Feature: create Employee
   You can create an Employee
 
   Scenario Outline: You created an Employee
-    Given create employee {int} {string}{string}{string}
+    Given create employee {string}{string}{string}{word}
     When i enter create_employee
     Then i should respond <status>
     Examples:

@@ -32,5 +32,12 @@ public class StepDefinitions {
         Employee employee = new Employee(firstname, lastname, job_description, birthdate);
     }
 
+    @Given("create employee \\{string}\\{string}\\{string}\\{word}")
+    public void create_employee() {
+        // Write code here that turns the phrase above into concrete actions
+        Employee employee = new Employee();
+    }
+
+
 
 }
