@@ -1,14 +1,11 @@
-
-
-
 Feature: create Employee
   You can create an Employee
 
   Scenario Outline: You created an Employee
-    Given create employee {string}{string}{string}{word}
+    Given create employee "<name>" "<last_name>" "<job_description>" "<birthdate>"
     When i enter create_employee
-    Then i should respond <status>
+    Then i should respond "<status>"
     Examples:
-      | employee_created_status | status                             |
-      | true                    | You succesfully created a employee |
-      | false                   | You failed at creating an employee |
+      | status                             | name  | last_name | job_description | birthdate  |
+      | You succesfully created a employee | john  | johnson   | a job           | 1990-20-11 |
+      | You failed at creating an employee | peter | peterson  | b job           | 1990-20-11 |
