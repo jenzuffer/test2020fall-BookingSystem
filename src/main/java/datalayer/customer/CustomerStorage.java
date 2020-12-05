@@ -15,5 +15,5 @@ public interface CustomerStorage {
 
     public int createCustomer(CustomerCreation customerToCreate) throws SQLException;
 
-    public String updateCustomerWithPhoneNumber(Customer customer, String phoneNumber);
+    public String updateCustomerWithPhoneNumber(Customer customer, String phoneNumber) throws SQLException;
 }

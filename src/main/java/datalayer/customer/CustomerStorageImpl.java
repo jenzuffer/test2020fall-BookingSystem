@@ -108,8 +108,22 @@ public class CustomerStorageImpl implements CustomerStorage {
         }
     }
 
-    public String updateCustomerWithPhoneNumber(Customer customer, String phoneNumber)
-    {
-        return "";
+    public String updateCustomerWithPhoneNumber(Customer customer, String phoneNumber) throws SQLException {
+        String sql = "update DemoApplicationTest.Customers set phonenvarchar = ? where ID = ?";
+        try (Connection con = getConnection();
+             var stmt = con.prepareStatement(sql)) {
+            stmt.setString(1, phoneNumber);
+            stmt.setInt(2, customer.getId());
+            stmt.executeUpdate();
+
+            // get the newly created id
+            try (var resultSet = stmt.getGeneratedKeys()) {
+                resultSet.next();
+                String phone = resultSet.getString(1);
+                System.out.println("phone: " + phone);
+                return phone;
+            }
+        }
+
     }
 }
